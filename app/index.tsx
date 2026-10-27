@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Svg, { Circle, Polygon } from 'react-native-svg';
 import { BrandMark, Card, LangToggle, P, Screen } from '../src/components/ui';
-import { Cover, Glyph, Shelf, TabBar, Tile } from '../src/components/Music';
+import { Cover, Shelf, TabBar, Tile, navScroll } from '../src/components/Music';
 import { ThemePicker } from '../src/components/Decor';
 import { useLang } from '../src/i18n';
 import { useStore } from '../src/store';
@@ -21,14 +21,14 @@ const star = Array.from({ length: 16 }, (_, i) => {
 }).join(' ');
 
 export default function Home() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { songs } = useStore();
   const router = useRouter();
   const kindArt = (k: string, i: number) => (k === 'quiet' ? 'navy' : k === 'joyful' ? 'red' : (['green', 'gold', 'plum'] as const)[i % 3]);
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 26, paddingBottom: 140, maxWidth: 720, width: '100%', alignSelf: 'center' }}>
+      <ScrollView onScroll={navScroll} scrollEventThrottle={16} contentContainerStyle={{ padding: 20, paddingTop: 26, paddingBottom: 140, maxWidth: 720, width: '100%', alignSelf: 'center' }}>
         {/* header: date style label, big italic title, language */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -73,13 +73,14 @@ export default function Home() {
           <Shelf title={t.joinIn}>
             <Tile title={t.tabEnrol} sub={t.how1} art="red" icon="plus" onPress={() => router.push('/enroll')} />
             <Tile title={t.tabCarols} sub={t.how2} art="green" icon="note" onPress={() => router.push('/songs')} />
+            <Tile title={t.tabPrayer} sub={t.visitOrder} art="gold" icon="pray" onPress={() => router.push('/prayer')} />
             <Tile title={t.myVisit} sub={t.how3} art="navy" icon="clock" onPress={() => router.push('/my-visit')} />
           </Shelf>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(250).duration(600)}>
           <Shelf title={t.carolsShelf} action={t.seeAll} onAction={() => router.push('/songs')}>
-            {songs.slice(0, 10).map((s, i) => (
+            {songs.filter((s) => s.lang === lang).slice(0, 10).map((s, i) => (
               <Cover key={s.id} title={s.title} art={kindArt(s.kind, i)} onPress={() => router.push('/songs')} />
             ))}
           </Shelf>

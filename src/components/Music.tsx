@@ -1,5 +1,6 @@
-import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useEffect, useSyncExternalStore } from 'react';
+import { NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path, Polygon } from 'react-native-svg';
@@ -16,7 +17,7 @@ export const ART: Record<string, [string, string]> = {
   plum: ['#B4478F', '#511C57'],
 };
 
-export type Icon = 'home' | 'note' | 'plus' | 'clock' | 'star' | 'paper' | 'chevron';
+export type Icon = 'home' | 'note' | 'plus' | 'clock' | 'star' | 'paper' | 'chevron' | 'pray' | 'book';
 
 export function Glyph({ name, size = 24, color = '#fff', stroke = 1.9 }: { name: Icon; size?: number; color?: string; stroke?: number }) {
   const p = { stroke: color, strokeWidth: stroke, fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
@@ -48,6 +49,17 @@ export function Glyph({ name, size = 24, color = '#fff', stroke = 1.9 }: { name:
           <Path d="M14 3v5h5M9 13h7M9 17h7" {...p} />
         </>
       )}
+      {name === 'pray' && (
+        <>
+          <Path d="M12 3v18M7 8h10" {...p} />
+        </>
+      )}
+      {name === 'book' && (
+        <>
+          <Path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" {...p} />
+          <Path d="M4 21V5M9 7h6" {...p} />
+        </>
+      )}
       {name === 'chevron' && <Path d="M9 5l7 7-7 7" {...p} />}
       {name === 'star' && (
         <Polygon
@@ -63,30 +75,69 @@ export function Glyph({ name, size = 24, color = '#fff', stroke = 1.9 }: { name:
   );
 }
 
+// The tab bar slides away while you scroll down to read, and returns when you scroll up or reach the top.
+let navHidden = false;
+let lastY = 0;
+const navSubs = new Set<() => void>();
+const setNavHidden = (h: boolean) => {
+  if (navHidden !== h) {
+    navHidden = h;
+    navSubs.forEach((f) => f());
+  }
+};
+const useNavHidden = () =>
+  useSyncExternalStore(
+    (f) => {
+      navSubs.add(f);
+      return () => navSubs.delete(f);
+    },
+    () => navHidden,
+    () => false,
+  );
+export const navScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const y = e.nativeEvent.contentOffset.y;
+  const dy = y - lastY;
+  lastY = y;
+  if (y < 40) setNavHidden(false);
+  else if (dy > 7) setNavHidden(true);
+  else if (dy < -7) setNavHidden(false);
+};
+
 // Floating glass tab bar at the bottom, like the Music app.
-export function TabBar({ active }: { active: 'home' | 'carols' | 'enrol' | 'visit' }) {
+export function TabBar({ active }: { active: 'home' | 'carols' | 'prayer' | 'enrol' | 'visit' }) {
   const router = useRouter();
   const { t } = useLang();
+  const hidden = useNavHidden();
+  const k = useSharedValue(0);
+  useEffect(() => {
+    lastY = 0;
+    setNavHidden(false);
+  }, []);
+  useEffect(() => {
+    k.value = withTiming(hidden ? 1 : 0, { duration: 320, easing: Easing.out(Easing.cubic) });
+  }, [hidden]);
+  const slide = useAnimatedStyle(() => ({ transform: [{ translateY: k.value * 130 }, { scale: 1 - k.value * 0.06 }], opacity: 1 - k.value }));
   const items: [typeof active, string, Icon, string][] = [
     ['home', t.tabHome, 'home', '/'],
     ['carols', t.tabCarols, 'note', '/songs'],
+    ['prayer', t.tabPrayer, 'pray', '/prayer'],
     ['enrol', t.tabEnrol, 'plus', '/enroll'],
     ['visit', t.myVisit, 'clock', '/my-visit'],
   ];
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: 14, alignItems: 'center' }}>
-      <Glass style={{ width: '92%', maxWidth: 480, borderRadius: 30, flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 6 }}>
-        {items.map(([k, label, icon, to]) => {
-          const on = k === active;
+    <Animated.View pointerEvents={hidden ? 'none' : 'box-none'} style={[{ position: 'absolute', left: 0, right: 0, bottom: 14, alignItems: 'center' }, slide]}>
+      <Glass style={{ width: '94%', maxWidth: 520, borderRadius: 30, flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 4 }}>
+        {items.map(([key, label, icon, to]) => {
+          const on = key === active;
           return (
-            <Pressable key={k} onPress={() => !on && router.replace(to as any)} style={{ flex: 1, alignItems: 'center', paddingVertical: 4 }}>
-              <Glyph name={icon} size={24} color={on ? colors.gold : colors.textSoft} />
-              <Text numberOfLines={1} style={{ color: on ? colors.gold : colors.textSoft, fontFamily: on ? fonts.bodyBold : fonts.bodyMedium, fontSize: 11, marginTop: 3 }}>{label}</Text>
+            <Pressable key={key} onPress={() => !on && router.replace(to as any)} style={{ flex: 1, alignItems: 'center', paddingVertical: 4 }}>
+              <Glyph name={icon} size={23} color={on ? colors.gold : colors.textSoft} />
+              <Text numberOfLines={1} style={{ color: on ? colors.gold : colors.textSoft, fontFamily: on ? fonts.bodyBold : fonts.bodyMedium, fontSize: 10.5, marginTop: 3 }}>{label}</Text>
             </Pressable>
           );
         })}
       </Glass>
-    </View>
+    </Animated.View>
   );
 }
 

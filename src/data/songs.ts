@@ -1,13 +1,24 @@
-export type Song = { id: string; title: string; lang: 'en' | 'ta'; kind: 'classic' | 'joyful' | 'quiet'; lyrics?: string };
+export type Song = {
+  id: string;
+  title: string;
+  lang: 'en' | 'ta';
+  kind: 'classic' | 'joyful' | 'quiet';
+  lyrics?: string;
+  no?: number; // number in the Victorians Youth booklet
+  page?: number; // page of public/Carols.pdf where the original is
+  check?: boolean; // typed from a scan and not yet proofread
+};
+
+import { TA_SONGS } from './songs.ta';
 
 // Stanzas are split by a blank line. A stanza that starts with "~" is the chorus.
 const carol = (verses: string[], chorus?: string) => verses.flatMap((v) => (chorus ? [v, '~' + chorus] : [v])).join('\n\n');
 
 // Starter list of well-known carols, all in the public domain. The parish team adds the Tamil carols
 // and the youth's own favourites (with lyrics) in the admin screen.
-export const SONGS: Song[] = [
+export const EN_SONGS: Song[] = [
   {
-    id: 'silent-night', title: 'Silent Night', lang: 'en', kind: 'quiet',
+    id: 'silent-night', page: 15, title: 'Silent Night', lang: 'en', kind: 'quiet',
     lyrics: carol([
       'Silent night, holy night!\nAll is calm, all is bright\nRound yon virgin mother and child.\nHoly infant so tender and mild,\nSleep in heavenly peace,\nSleep in heavenly peace.',
       'Silent night, holy night!\nShepherds quake at the sight;\nGlories stream from heaven afar,\nHeavenly hosts sing Alleluia;\nChrist the Saviour is born!\nChrist the Saviour is born!',
@@ -23,7 +34,7 @@ export const SONGS: Song[] = [
     ]),
   },
   {
-    id: 'o-come', title: 'O Come, All Ye Faithful', lang: 'en', kind: 'classic',
+    id: 'o-come', page: 16, title: 'O Come, All Ye Faithful', lang: 'en', kind: 'classic',
     lyrics: carol(
       [
         'O come, all ye faithful, joyful and triumphant,\nO come ye, O come ye to Bethlehem;\nCome and behold Him, born the King of angels;',
@@ -74,7 +85,7 @@ export const SONGS: Song[] = [
     ),
   },
   {
-    id: 'angels-heard', title: 'Angels We Have Heard on High', lang: 'en', kind: 'joyful',
+    id: 'angels-heard', page: 15, title: 'Angels We Have Heard on High', lang: 'en', kind: 'joyful',
     lyrics: carol(
       [
         "Angels we have heard on high\nSweetly singing o'er the plains,\nAnd the mountains in reply\nEchoing their joyous strains.",
@@ -124,4 +135,11 @@ export const SONGS: Song[] = [
       'Go, tell it on the mountain,\nOver the hills and everywhere;\nGo, tell it on the mountain\nThat Jesus Christ is born.',
     ),
   },
+  {
+    id: 'jingle-bells', page: 17, title: 'Jingle Bells', lang: 'en', kind: 'joyful',
+    lyrics: carol(["Dashing through the snow\nIn a one horse open sleigh\nO'er the fields we go,\nLaughing all the way\nBells on bob tail ring,\nMaking spirits bright\nWhat fun it is to laugh and sing\nA sleighing song tonight"], "Oh, jingle bells, jingle bells\nJingle all the way\nOh, what fun it is to ride\nIn a one horse open sleigh\nJingle bells, jingle bells\nJingle all the way\nOh, what fun it is to ride\nIn a one horse open sleigh"),
+  },
 ];
+
+// English carols first, then the Tamil booklet carols.
+export const SONGS: Song[] = [...EN_SONGS, ...TA_SONGS];
