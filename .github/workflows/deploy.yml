@@ -1,0 +1,57 @@
+# Builds the web app and publishes it to GitHub Pages on every push to main.
+# One-time setup in the repo: Settings > Pages > Source = "GitHub Actions", then
+# Settings > Secrets and variables > Actions > Variables: add SUPABASE_URL and SUPABASE_ANON_KEY.
+# (The anon / publishable key is meant to be public. Never add the service_role key.)
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - name: Build the web app
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          case "$REPO" in
+            *.github.io) export EXPO_PUBLIC_BASE_URL="" ;;
+            *) export EXPO_PUBLIC_BASE_URL="/$REPO" ;;
+          esac
+          npx expo export --platform web
+          cp dist/index.html dist/404.html   # deep links such as /enroll fall back to the app
+          touch dist/.nojekyll               # GitHub Pages must not skip the _expo folder
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
