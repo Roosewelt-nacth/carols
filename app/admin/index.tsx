@@ -205,7 +205,7 @@ export default function Admin() {
         <View key={id} style={{ marginTop: 10, borderTopWidth: 1, borderColor: colors.cardBorder, paddingTop: 8 }}>
           <P soft={false}>{i + 1}. {h.name} · {h.address}  [{STATUS_LABEL[st]}]</P>
           {h.blessing ? <P size={12}>Would like a house blessing</P> : null}
-          {h.prayer ? <P size={12}>Prayer: {h.prayer}</P> : null}
+          {h.prayer ? <P size={12}>Intentions: {h.prayer}</P> : null}
           {last && <P size={12}>Last: {last.action} by {last.who}, {stamp(last.at)}</P>}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {h.phone ? <Chip small label={t.send} on={st === 'told'} onPress={() => { s.setStatus(date, id, 'told', 'told by WhatsApp'); wa(h.phone, messageFor(h, date, group)); }} /> : null}
@@ -378,7 +378,7 @@ export default function Admin() {
                         {h.phone ? <P size={13}>{h.phone}</P> : <P size={13}>No phone number</P>}
                         {h.landmark ? <P size={13}>Gate: {h.landmark}</P> : null}
                         {picked.length > 0 && <P size={13}>Carols: {picked.join(', ')}</P>}
-                        {h.prayer ? <P size={13}>Prayer: {h.prayer}</P> : null}
+                        {h.prayer ? <P size={13}>Intentions: {h.prayer}</P> : null}
                         {(h.away || []).length > 0 && <P size={13}>Away: {(h.away || []).map(dayLabel).join(', ')}</P>}
                         <View style={{ height: 6 }} />
                         <P size={12}>Anbiyam</P>
@@ -480,7 +480,7 @@ export default function Admin() {
                   <P>{selHouse.address}{selHouse.area ? `, ${selHouse.area}` : ''}</P>
                   {selHouse.landmark ? <P size={13}>Gate: {selHouse.landmark}</P> : null}
                   {selHouse.blessing ? <P size={13}>Would like a house blessing</P> : null}
-                  {selHouse.prayer ? <P size={13}>Prayer: {selHouse.prayer}</P> : null}
+                  {selHouse.prayer ? <P size={13}>Intentions: {selHouse.prayer}</P> : null}
                   <View style={{ height: 8 }} />
                   {selDay ? (
                     <>

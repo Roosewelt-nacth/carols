@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BrandBar, Chip, Group, Screen, Title } from '../src/components/ui';
 import { ART, Glyph, TabBar, navScroll } from '../src/components/Music';
@@ -62,6 +62,10 @@ export default function Songs() {
   const { songs } = useStore();
   const [lang, setLang] = useState<'all' | 'en' | 'ta'>('all');
   const [open, setOpen] = useState<string | null>(null);
+  const { open: openParam } = useLocalSearchParams<{ open?: string }>();
+  useEffect(() => {
+    if (openParam) setOpen(String(openParam));
+  }, [openParam]);
   const shown = songs.filter((s) => lang === 'all' || s.lang === lang);
   const cur = songs.find((s) => s.id === open) || null;
   return (

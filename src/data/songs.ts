@@ -7,6 +7,7 @@ export type Song = {
   no?: number; // number in the Victorians Youth booklet
   page?: number; // page of public/Carols.pdf where the original is
   check?: boolean; // typed from a scan and not yet proofread
+  ending?: boolean; // good as the last song of a visit
 };
 
 import { TA_SONGS } from './songs.ta';
@@ -136,8 +137,12 @@ export const EN_SONGS: Song[] = [
     ),
   },
   {
-    id: 'jingle-bells', page: 17, title: 'Jingle Bells', lang: 'en', kind: 'joyful',
+    id: 'jingle-bells', page: 17, ending: true, title: 'Jingle Bells', lang: 'en', kind: 'joyful',
     lyrics: carol(["Dashing through the snow\nIn a one horse open sleigh\nO'er the fields we go,\nLaughing all the way\nBells on bob tail ring,\nMaking spirits bright\nWhat fun it is to laugh and sing\nA sleighing song tonight"], "Oh, jingle bells, jingle bells\nJingle all the way\nOh, what fun it is to ride\nIn a one horse open sleigh\nJingle bells, jingle bells\nJingle all the way\nOh, what fun it is to ride\nIn a one horse open sleigh"),
+  },
+  {
+    id: 'merry-christmas', ending: true, title: 'We Wish You a Merry Christmas', lang: 'en', kind: 'joyful',
+    lyrics: carol(["We wish you a merry Christmas;\nWe wish you a merry Christmas;\nWe wish you a merry Christmas\nAnd a happy New Year.", "Oh, bring us a figgy pudding;\nOh, bring us a figgy pudding;\nOh, bring us a figgy pudding\nAnd bring it right here!", "We won't go until we get some;\nWe won't go until we get some;\nWe won't go until we get some,\nSo bring it right here!", "We all like our figgy pudding;\nWe all like our figgy pudding;\nWe all like our figgy pudding,\nWith all its good cheer!"], "Good tidings we bring\nTo you and your kin;\nGood tidings for Christmas\nAnd a happy New Year!"),
   },
 ];
 
