@@ -29,6 +29,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
+      - name: Refuse to publish without the database settings
+        run: |
+          if [ -z "${{ vars.SUPABASE_URL }}" ] || [ -z "${{ vars.SUPABASE_ANON_KEY }}" ]; then
+            echo "::error::Add the repository variables SUPABASE_URL and SUPABASE_ANON_KEY (Settings > Secrets and variables > Actions > Variables). Without them the site would run in demo mode and save nothing."
+            exit 1
+          fi
       - name: Build the web app
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
